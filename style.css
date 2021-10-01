@@ -1,0 +1,16 @@
+img {
+    max-width: 100%;
+}
+
+
+.vizlayout h1 {
+    text-align: center;
+    font-size: 5rem;
+}
+
+.imgcenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}

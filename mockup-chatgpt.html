@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Department of Mathematics & Computer Science | Liberal Arts University</title>
+  <meta name="description" content="A student-centered, liberal-arts grounded department where math and computing meet creativity, ethics, and real-world impact." />
+  <style>
+    :root{
+      --bg: #0b0d12;           /* deep ink */
+      --bg-soft:#11141b;       /* panel */
+      --text:#e8edf2;          /* near white */
+      --muted:#b9c4cf;         /* muted text */
+      --brand:#5dd0ff;         /* cyan */
+      --brand-2:#9b7bff;       /* violet */
+      --accent:#a9ff68;        /* lime */
+      --card:#171a22;          /* card */
+      --stroke:#1f2430;        /* borders */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-lg: 22px;
+      --container: 1200px;
+    }
+
+    *{box-sizing:border-box}
+    html, body{margin:0; padding:0; background:var(--bg); color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; line-height:1.5}
+    a{color:var(--brand)}
+    .container{max-width:var(--container); margin-inline:auto; padding: clamp(16px, 2.5vw, 32px)}
+
+    /* Header */
+    header{
+      position:sticky; top:0; z-index:40;
+      backdrop-filter:saturate(180%) blur(10px);
+      background:linear-gradient(180deg, rgba(11,13,18,.85), rgba(11,13,18,.6));
+      border-bottom:1px solid var(--stroke);
+    }
+    .nav{display:flex; align-items:center; justify-content:space-between}
+    .brand{display:flex; gap:.6rem; align-items:center; font-weight:800; letter-spacing:.4px}
+    .brand .logo{
+      width:36px; height:36px; border-radius:10px;
+      background: conic-gradient(from 210deg at 50% 50%, var(--brand), var(--brand-2), var(--accent), var(--brand));
+      box-shadow: 0 8px 20px rgba(157, 124, 255, .25);
+    }
+    .nav a{ text-decoration:none; font-weight:600; color:var(--text)}
+    .links{display:flex; gap:1rem; align-items:center}
+    .links a{opacity:.85}
+    .links a:hover{opacity:1; color:var(--brand)}
+    .apply-btn{padding:.55rem .9rem; border-radius:999px; background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:#0b0d12; font-weight:800}
+
+    /* Hero */
+    .hero{position:relative; overflow:hidden; border-bottom:1px solid var(--stroke)}
+    .hero-wrap{display:grid; grid-template-columns: 1.2fr .8fr; gap: clamp(18px, 3vw, 28px); align-items:center; min-height: 64svh}
+    .kicker{color:var(--accent); text-transform:uppercase; letter-spacing:.15em; font-weight:800; font-size:.85rem}
+    h1{font-size: clamp(2rem, 4.2vw, 3.6rem); line-height:1.08; margin:.35rem 0 .75rem}
+    .lead{color:var(--muted); font-size: clamp(1.05rem, 1.4vw, 1.25rem)}
+    .cta{display:flex; gap:.75rem; margin-top:1.25rem}
+    .btn{display:inline-flex; align-items:center; gap:.5rem; padding:.8rem 1rem; border-radius:12px; border:1px solid var(--stroke); text-decoration:none; font-weight:700}
+    .btn-primary{background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:#0b0d12; border-color:transparent}
+    .btn:hover{transform: translateY(-1px)}
+    .hero-visual{
+      position:relative; height:100%; min-height:340px; border-radius:var(--radius-lg);
+      background:
+        radial-gradient(1200px 600px at -10% 120%, rgba(93,208,255,.12), transparent 55%),
+        radial-gradient(900px 600px at 120% -10%, rgba(155,123,255,.15), transparent 55%),
+        linear-gradient(180deg, #0d1018, #0b0d12);
+      border:1px solid var(--stroke); box-shadow:var(--shadow);
+      display:grid; place-items:center; overflow:hidden;
+    }
+    .hero-shapes{
+      position:absolute; inset:0; pointer-events:none;
+      background: radial-gradient(500px 300px at 70% 30%, rgba(169,255,104,.08), transparent 60%);
+    }
+    .ticker{
+      position:absolute; bottom:0; left:0; right:0; padding:.65rem 1rem; font-size:.9rem; color:var(--muted);
+      border-top:1px dashed var(--stroke); background:linear-gradient(180deg, rgba(17,20,27,.6), rgba(17,20,27,.3));
+    }
+
+    /* Sections */
+    section{padding: clamp(36px, 6vw, 72px) 0; border-bottom:1px solid var(--stroke)}
+    h2{font-size: clamp(1.6rem, 3vw, 2.2rem); margin:0 0 .75rem}
+    .sub{color:var(--muted); margin:0 0 1.25rem}
+
+    /* Cards & grids */
+    .grid{display:grid; gap: clamp(16px, 2vw, 24px)}
+    .grid-3{grid-template-columns: repeat(3, minmax(0, 1fr))}
+    .grid-2{grid-template-columns: repeat(2, minmax(0, 1fr))}
+    @media (max-width: 900px){ .hero-wrap{grid-template-columns:1fr} .grid-3, .grid-2{grid-template-columns:1fr}}
+
+    .card{background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius); padding: clamp(14px, 2vw, 18px); box-shadow: var(--shadow)}
+    .eyebrow{font-size:.8rem; font-weight:800; text-transform:uppercase; letter-spacing:.12em; color:var(--brand)}
+    .tag{display:inline-block; padding:.2rem .5rem; border:1px solid var(--stroke); border-radius:999px; font-size:.78rem; color:var(--muted)}
+    .meta{display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin:.4rem 0 .2rem}
+
+    /* Research cards */
+    .card h3{margin:.2rem 0 .4rem; font-size:1.15rem}
+    .card p{color:var(--muted); margin:.2rem 0 .6rem}
+    .card .actions{display:flex; gap:.5rem; flex-wrap:wrap}
+
+    /* Alumni */
+    .alumni{
+      display:grid; grid-template-columns: 1.2fr .8fr; gap: clamp(16px, 2.5vw, 26px);
+    }
+    @media (max-width: 980px){ .alumni{grid-template-columns:1fr} }
+    .quote{font-size:1.05rem; color:var(--muted)}
+
+    /* Degree plan list */
+    .degree-grid{display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 2vw, 24px)}
+    @media (max-width: 780px){ .degree-grid{grid-template-columns:1fr}}
+    .degree-title{font-weight:900; font-size:1.15rem}
+    .list{margin:.4rem 0 0; padding:0; list-style:none}
+    .list li{padding:.35rem 0; color:var(--muted)}
+
+    /* Footer */
+    footer{padding:32px 0; color:var(--muted)}
+    .footer-grid{display:grid; grid-template-columns: 1fr 1fr; gap:18px}
+    @media (max-width:700px){.footer-grid{grid-template-columns:1fr}}
+
+    /* Utility */
+    .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+  </style>
+</head>
+<body>
+  <header aria-label="Main navigation">
+    <div class="container nav">
+      <div class="brand"><span class="logo" aria-hidden="true"></span><a href="#top">Mathematics & Computer Science</a></div>
+      <nav class="links" aria-label="Primary">
+        <a href="#about">About</a>
+        <a href="#research">Student Research</a>
+        <a href="#alumni">Alumni</a>
+        <a href="#degrees">Degree Plans</a>
+        <a class="apply-btn" href="#contact">Apply</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- Hero / Intro -->
+    <section class="hero" id="about">
+      <div class="container hero-wrap">
+        <div>
+          <p class="kicker">Department of Mathematics & Computer Science</p>
+          <h1>Where patterns meet possibility—and you lead the discovery.</h1>
+          <p class="lead">The Department of Mathematics and Computer Science invites you to explore the language of patterns, logic, and discovery. Here, numbers, algorithms, and ideas are not just tools but gateways to understanding the world—and reshaping it.<br><br>
+            In our liberal-arts setting, you’ll pair rigorous thinking with creative making. From elegant proofs to ethical AI, you’ll learn to connect ideas across disciplines and build tools that matter for people and communities.</p>
+          <div class="cta">
+            <a class="btn btn-primary" href="#research">Explore Student Research</a>
+            <a class="btn" href="#degrees" aria-label="Jump to degree plans">Find Your Degree Path</a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-shapes"></div>
+          <svg width="100%" height="100%" viewBox="0 0 600 420" role="img" aria-label="Abstract math & code shapes">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="var(--brand)"/>
+                <stop offset="100%" stop-color="var(--brand-2)"/>
+              </linearGradient>
+            </defs>
+            <g opacity="0.9">
+              <circle cx="110" cy="90" r="56" fill="none" stroke="url(#g1)" stroke-width="2"/>
+              <rect x="320" y="60" width="140" height="90" rx="12" fill="none" stroke="url(#g1)" stroke-width="2"/>
+              <path d="M50,320 C180,210 420,410 560,300" fill="none" stroke="url(#g1)" stroke-width="2"/>
+              <text x="100" y="200" fill="var(--muted)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas" font-size="14">for (let i = 0; i &lt; n; i++) { sum += a[i]; }</text>
+              <text x="100" y="225" fill="var(--muted)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas" font-size="14">∇·F = 0  λ₁ ≤ λ₂ ≤ ···</text>
+            </g>
+          </svg>
+          <div class="ticker" aria-live="polite">Hands-on projects • Faculty mentorship • Interdisciplinary learning • Community impact</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Student Research -->
+    <section id="research" aria-labelledby="research-heading">
+      <div class="container">
+        <h2 id="research-heading">Student Research That Makes a Difference</h2>
+        <p class="sub">From cipher-breaking and climate models to equitable AI and creative apps—our students don’t wait for the future; they prototype it.</p>
+
+        <div class="grid grid-3" role="list">
+          <article class="card" role="listitem">
+            <span class="eyebrow">Applied Math</span>
+            <h3>Optimizing Urban Bike Networks</h3>
+            <p>Senior capstone combining graph theory and operations research to improve bike-lane connectivity for safer commutes.</p>
+            <div class="meta"><span class="tag">Graph Theory</span><span class="tag">OR</span><span class="tag">Civic Tech</span></div>
+            <div class="actions"><a class="btn" href="#">Abstract</a><a class="btn" href="#">Poster</a></div>
+          </article>
+
+          <article class="card" role="listitem">
+            <span class="eyebrow">Computer Science</span>
+            <h3>Detecting Bias in Small Language Models</h3>
+            <p>Course-based research auditing model outputs and proposing dataset interventions grounded in ethics and HCI.</p>
+            <div class="meta"><span class="tag">AI</span><span class="tag">Ethics</span><span class="tag">HCI</span></div>
+            <div class="actions"><a class="btn" href="#">Repo</a><a class="btn" href="#">Demo</a></div>
+          </article>
+
+          <article class="card" role="listitem">
+            <span class="eyebrow">Data Science</span>
+            <h3>Predicting Harmful Algal Blooms</h3>
+            <p>Team-taught project blending time-series modeling with environmental science to support local watershed groups.</p>
+            <div class="meta"><span class="tag">Time Series</span><span class="tag">R</span><span class="tag">EnvSci</span></div>
+            <div class="actions"><a class="btn" href="#">Brief</a><a class="btn" href="#">Slides</a></div>
+          </article>
+        </div>
+
+        <div class="cta" style="margin-top:1rem">
+          <a class="btn btn-primary" href="/research" aria-label="See all research projects">See All Research Projects</a>
+          <a class="btn" href="#contact">Work With a Faculty Mentor</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Alumni Highlights -->
+    <section id="alumni" aria-labelledby="alumni-heading">
+      <div class="container alumni">
+        <div>
+          <h2 id="alumni-heading">Alumni Pathways & Possibilities</h2>
+          <p class="sub">Our graduates turn curiosity into careers—building products, proving theorems, teaching the next generation, and leading with integrity.</p>
+
+          <article class="card">
+            <p class="eyebrow">Product & Engineering</p>
+            <h3 class="degree-title">Ari Patel ’21 — Software Engineer, HealthTech</h3>
+            <p class="quote">“The blend of algorithms and ethics shaped how I build—human-centered code at scale. My senior project became the backbone of my interview portfolio.”</p>
+          </article>
+
+          <article class="card">
+            <p class="eyebrow">Research & Grad Study</p>
+            <h3 class="degree-title">Maya Rodriguez ’22 — PhD Student, Applied Mathematics</h3>
+            <p class="quote">“Small classes meant big questions. Faculty mentorship helped me publish as an undergrad and find my research voice.”</p>
+          </article>
+        </div>
+        <aside class="card" aria-label="Career destinations">
+          <p class="eyebrow">Where You Might Go</p>
+          <ul class="list" aria-label="Typical roles and sectors">
+            <li>Data Scientist • Quantitative Analyst • Software Engineer</li>
+            <li>Bioinformatics • Cybersecurity • EdTech • Civic Tech</li>
+            <li>MS/PhD in Math, CS, Data Science, HCI, or Statistics</li>
+            <li>Teaching Fellowships • Research Labs • Startups</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Degree Plans -->
+    <section id="degrees" aria-labelledby="degrees-heading">
+      <div class="container">
+        <h2 id="degrees-heading">Degree Plans & Pathways</h2>
+        <p class="sub">Choose a route that fits your goals. Every plan builds your quantitative reasoning, computational fluency, and ethical judgment.</p>
+
+        <div class="degree-grid">
+          <article class="card">
+            <div class="degree-title">B.S. in Computer Science</div>
+            <ul class="list">
+              <li>Core: Data Structures, Algorithms, Systems, Databases, Networks</li>
+              <li>Electives: AI/ML, HCI, Security, Web, Mobile, Graphics</li>
+              <li>Capstone: Team software project for a community partner</li>
+            </ul>
+            <div class="actions"><a class="btn" href="#">Sample 4-Year Plan</a><a class="btn" href="#">Course Catalog</a></div>
+          </article>
+
+          <article class="card">
+            <div class="degree-title">B.S. in Mathematics</div>
+            <ul class="list">
+              <li>Core: Proof, Linear Algebra, Abstract Algebra, Analysis</li>
+              <li>Tracks: Pure, Applied, Statistics, Math for Teaching</li>
+              <li>Experience: Research seminar and mathematical modeling</li>
+            </ul>
+            <div class="actions"><a class="btn" href="#">Sample 4-Year Plan</a><a class="btn" href="#">Course Catalog</a></div>
+          </article>
+
+          <article class="card">
+            <div class="degree-title">B.A. in Mathematics</div>
+            <ul class="list">
+              <li>Liberal-arts emphasis with flexible electives</li>
+              <li>Ideal for double majors (Economics, Physics, Philosophy)</li>
+              <li>Senior thesis or practicum with interdisciplinary focus</li>
+            </ul>
+            <div class="actions"><a class="btn" href="#">Sample 4-Year Plan</a><a class="btn" href="#">Course Catalog</a></div>
+          </article>
+
+          <article class="card">
+            <div class="degree-title">Minor in Data Science</div>
+            <ul class="list">
+              <li>Programming, Statistics, Data Ethics, Visualization</li>
+              <li>Project-based labs with real datasets</li>
+              <li>Pairs well with Biology, Sociology, Business, Media</li>
+            </ul>
+            <div class="actions"><a class="btn" href="#">Requirements</a><a class="btn" href="#">Advising Guide</a></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact / Call to action -->
+    <section id="contact" aria-labelledby="contact-heading">
+      <div class="container grid grid-2">
+        <div>
+          <h2 id="contact-heading">Ready to explore what you can build?</h2>
+          <p class="sub">Let us know your interests and we’ll help you chart a path—research, internships, and courses that match your goals.</p>
+          <a class="btn btn-primary" href="#">Request Info</a>
+          <a class="btn" href="#">Visit the Department</a>
+        </div>
+        <form class="card" aria-label="Quick interest form" onsubmit="event.preventDefault(); alert('Thanks! We will be in touch.');">
+          <label class="sr-only" for="name">Name</label>
+          <input id="name" name="name" placeholder="Your name" style="width:100%; padding:.8rem; border-radius:10px; border:1px solid var(--stroke); background:var(--bg); color:var(--text); margin-bottom:.6rem" required>
+          <label class="sr-only" for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="Email" style="width:100%; padding:.8rem; border-radius:10px; border:1px solid var(--stroke); background:var(--bg); color:var(--text); margin-bottom:.6rem" required>
+          <label class="sr-only" for="interest">Interests</label>
+          <select id="interest" name="interest" style="width:100%; padding:.8rem; border-radius:10px; border:1px solid var(--stroke); background:var(--bg); color:var(--text); margin-bottom:.6rem">
+            <option>Computer Science</option>
+            <option>Mathematics</option>
+            <option>Data Science</option>
+            <option>Unsure / Exploring</option>
+          </select>
+          <button class="btn btn-primary" type="submit">Get Connected</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div>
+        <strong>Math & CS — Liberal Arts University</strong>
+        <p class="sub">Curiosity, craft, and care. We learn by doing—and thinking about why it matters.</p>
+      </div>
+      <div style="text-align:right">
+        <a href="#top">Back to top ↑</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

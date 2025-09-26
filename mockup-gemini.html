@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics & Computer Science - Liberal Arts University</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom colors for a strong academic/tech feel */
+        :root {
+            --primary-color: #1e3a8a; /* Deep Blue */
+            --secondary-color: #f59e0b; /* Gold/Amber */
+        }
+        .text-primary { color: var(--primary-color); }
+        .bg-primary { background-color: var(--primary-color); }
+        .text-secondary { color: var(--secondary-color); }
+        .bg-secondary { background-color: var(--secondary-color); }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Light Gray Background */
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <!-- Navigation (Simple) -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-extrabold text-primary tracking-tight">
+                Math & CS
+            </a>
+            <nav class="hidden md:flex space-x-6">
+                <a href="#research" class="text-gray-600 hover:text-secondary font-medium transition duration-150">Research</a>
+                <a href="#alumni" class="text-gray-600 hover:text-secondary font-medium transition duration-150">Alumni</a>
+                <a href="#degrees" class="text-gray-600 hover:text-secondary font-medium transition duration-150">Degrees</a>
+                <a href="#" class="text-gray-600 hover:text-secondary font-medium transition duration-150">Faculty</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero/Intro Section -->
+    <section class="bg-primary text-white py-16 sm:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl sm:text-6xl font-black mb-4">
+                Mathematics and Computer Science
+            </h1>
+            <h2 class="text-xl sm:text-3xl font-light mb-8 text-gray-200">
+                Precision. Innovation. Insight.
+            </h2>
+            <p class="max-w-3xl mx-auto text-lg leading-relaxed mb-10">
+                The Department of Mathematics and Computer Science invites you to explore the language of patterns, logic, and discovery. Here, numbers, algorithms, and ideas are not just tools but gateways to understanding the world—and reshaping it.<br><br>
+                In mathematics, you’ll uncover the beauty of pure reasoning while developing skills that sharpen your problem-solving in every field, from physics to philosophy. In computer science, you’ll move from coding your first program to designing intelligent systems, creative apps, and innovative solutions to real-world challenges. Both disciplines cultivate the ability to think clearly, analyze deeply, and imagine boldly.<br><br>
+                What sets us apart is the liberal arts context: you won’t just learn formulas or syntax, but also how to connect technical knowledge to ethics, creativity, and human needs. Small classes and close faculty mentorship mean your curiosity drives your path—whether through research projects, collaborative problem-solving, or building software that makes a difference.<br><br>
+                Graduates of our department leave not only with strong technical skills, but with the adaptability, communication, and critical insight that today’s world demands. Our alumni thrive in careers ranging from data science and technology to teaching, finance, and graduate study.<br><br>
+                Here, you’ll find a community that values curiosity as much as mastery, and that believes mathematics and computer science are not just subjects to study, but adventures to live.
+            </p>
+            <a href="#degrees" class="inline-block bg-secondary text-primary font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-yellow-600 transition duration-300 transform hover:scale-105">
+                Explore Our Programs
+            </a>
+        </div>
+    </section>
+
+    <!-- Student Research Highlights Section -->
+    <section id="research" class="py-16 sm:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-3xl sm:text-4xl font-extrabold text-center mb-12 text-primary">
+                Undergraduate Research Spotlight
+            </h3>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Research Card 1 -->
+                <div class="bg-gray-50 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border-t-4 border-secondary">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L19.5 7.25m-6.25 6.25l-2.75 2.75m-6.25-6.25l2.75 2.75"></path></svg>
+                        <h4 class="text-xl font-semibold text-gray-900">Algorithmic Justice</h4>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">
+                        A senior thesis exploring bias detection in large language models using concepts from graph theory and computational complexity.
+                    </p>
+                    <p class="text-sm font-medium text-primary">Student: Alex Chen, Class of '25</p>
+                </div>
+
+                <!-- Research Card 2 -->
+                <div class="bg-gray-50 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border-t-4 border-secondary">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
+                        <h4 class="text-xl font-semibold text-gray-900">Planetary Trajectory Modeling</h4>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">
+                        A project applying differential equations and numerical analysis to simulate the orbital mechanics of newly discovered exoplanets.
+                    </p>
+                    <p class="text-sm font-medium text-primary">Student: Jamie Rivas, Class of '24</p>
+                </div>
+
+                <!-- Research Card 3 -->
+                <div class="bg-gray-50 p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 border-t-4 border-secondary">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 6v10a2 2 0 002 2h10a2 2 0 002-2v-6l-3-6-3 1m0 0v-5m0 5h6"></path></svg>
+                        <h4 class="text-xl font-semibold text-gray-900">Topological Data Analysis</h4>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">
+                        Investigating the use of persistent homology to find structural patterns in complex biological and medical datasets.
+                    </p>
+                    <p class="text-sm font-medium text-primary">Student: Samira Khan, Class of '26</p>
+                </div>
+            </div>
+
+            <!-- Link to Research Projects -->
+            <div class="mt-12 text-center">
+                <a href="https://example.com/all-research-projects" target="_blank" class="inline-flex items-center text-lg font-semibold text-secondary hover:text-primary transition duration-150">
+                    View All Current and Past Research Projects
+                    <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Alumni Success Section -->
+    <section id="alumni" class="py-16 sm:py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-3xl sm:text-4xl font-extrabold text-center mb-12 text-primary">
+                Alumni Shaping the Future
+            </h3>
+
+            <!-- Testimonial Card -->
+            <div class="max-w-4xl mx-auto bg-white p-8 sm:p-10 rounded-xl shadow-2xl border-b-8 border-secondary grid md:grid-cols-3 gap-8 items-center">
+                <div class="md:col-span-2">
+                    <p class="text-xl italic text-gray-700 mb-6">
+                        "The blend of abstract mathematical proof and hands-on coding skills I gained here was invaluable. It taught me how to break down massive problems into elegant, manageable solutions—a skill I use every day leading my engineering team."
+                    </p>
+                    <div class="font-bold text-lg text-primary">
+                        Dr. Lena Hayes
+                    </div>
+                    <div class="text-md text-secondary">
+                        Chief Data Scientist, Quantum Systems Inc.
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        B.A. Computer Science, Class of 2018
+                    </div>
+                </div>
+                <div class="md:col-span-1 flex justify-center">
+                    <!-- Placeholder for Alumni Photo/Icon -->
+                    <div class="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center border-4 border-secondary">
+                        <svg class="w-16 h-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.938 13.938 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <a href="https://example.com/alumni-stories" target="_blank" class="text-md font-medium text-gray-600 hover:text-secondary transition duration-150">
+                    Read More Alumni Success Stories &rarr;
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Degree Plans Section -->
+    <section id="degrees" class="py-16 sm:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-3xl sm:text-4xl font-extrabold text-center mb-12 text-primary">
+                Our Degree Programs
+            </h3>
+
+            <!-- Degree Plan Cards -->
+            <div class="grid md:grid-cols-3 gap-8">
+
+                <!-- Math Degree Card -->
+                <div class="bg-white p-8 rounded-xl shadow-xl border border-gray-200 flex flex-col h-full transform hover:scale-[1.02] transition duration-300">
+                    <h4 class="text-2xl font-bold mb-3 text-secondary">B.A. in Mathematics</h4>
+                    <p class="text-gray-600 mb-4 flex-grow">
+                        Focus on **theoretical foundations**, logic, and advanced problem-solving. Core coursework covers Calculus, Linear Algebra, Abstract Algebra, and Real Analysis. Students may choose tracks in Pure or Applied Mathematics.
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-700 list-disc list-inside mb-6">
+                        <li>Core focus on Proof Writing</li>
+                        <li>Electives in Topology or Number Theory</li>
+                        <li>Excellent preparation for Graduate School</li>
+                    </ul>
+                    <a href="#" class="mt-auto block text-center bg-primary text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-150">
+                        View Math Requirements
+                    </a>
+                </div>
+
+                <!-- CS Degree Card -->
+                <div class="bg-white p-8 rounded-xl shadow-xl border border-gray-200 flex flex-col h-full transform hover:scale-[1.02] transition duration-300">
+                    <h4 class="text-2xl font-bold mb-3 text-secondary">B.A. in Computer Science</h4>
+                    <p class="text-gray-600 mb-4 flex-grow">
+                        A rigorous program centered on **algorithm design**, data structures, and the principles of software engineering. Strong emphasis on the mathematical theory underpinning computation.
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-700 list-disc list-inside mb-6">
+                        <li>Core focus on Discrete Math & Logic</li>
+                        <li>Electives in AI, Graphics, or Systems</li>
+                        <li>Portfolio development encouraged</li>
+                    </ul>
+                    <a href="#" class="mt-auto block text-center bg-primary text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-150">
+                        View CS Requirements
+                    </a>
+                </div>
+
+                <!-- Data Science Minor Card -->
+                <div class="bg-white p-8 rounded-xl shadow-xl border border-gray-200 flex flex-col h-full transform hover:scale-[1.02] transition duration-300">
+                    <h4 class="text-2xl font-bold mb-3 text-secondary">Interdisciplinary Minor: Data Science</h4>
+                    <p class="text-gray-600 mb-4 flex-grow">
+                        A collaborative minor combining statistics, computational methods, and ethical reasoning for handling large datasets. Perfect for majors across all liberal arts disciplines.
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-700 list-disc list-inside mb-6">
+                        <li>Requires Statistics and Programming courses</li>
+                        <li>Focus on Data Visualization</li>
+                        <li>Ethical Data Handling Module</li>
+                    </ul>
+                    <a href="#" class="mt-auto block text-center bg-primary text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-150">
+                        View Minor Details
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-sm">&copy; 2024 Department of Mathematics and Computer Science | [University Name]</p>
+            <div class="flex justify-center space-x-4 mt-3">
+                <a href="#" class="text-gray-400 hover:text-secondary text-sm">Contact Us</a>
+                <span class="text-gray-500">|</span>
+                <a href="#" class="text-gray-400 hover:text-secondary text-sm">Apply Now</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

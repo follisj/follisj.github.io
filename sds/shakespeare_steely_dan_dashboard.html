@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Steely Dan × Shakespeare — Complete Analysis Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+  :root { 
+    --bg:#0f1220; --fg:#eef0f7; --muted:#c9ccda; --gold:#ffd700; --panel:#0f1630; 
+    --chatgpt:#6ee7b7; --claude:#f59e0b; --grok:#60a5fa; --mistral:#f472b6;
+    --copilot:#a78bfa; --gemini:#34d399; --meta:#fb7185; --perplexity:#fbbf24;
+        --ai-bg-image: url('sds_image.png'); /* change path if file sits elsewhere */
+  --ai-bg-fallback: #dbe9ff;                  /* light blue fallback */          /* solid light blue fallback */
+  }
+
+ /* AI Output tab: single background image */
+#sources-view{
+  background: var(--ai-bg-image) center center ;
+  background-color: var(--ai-bg-fallback); /* if image can’t load */
+}
+
+/* Keep the boxes transparent on this tab */
+#sources-view .sources-intro,
+#sources-view .sources-column,
+#sources-view .ai-entry{
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 4px solid rgba(0,0,0,0.15); /* or rgba(255,255,255,0.28) if you prefer light */
+}
+
+/* Optional: improve text legibility over the image */
+#sources-view h2,
+#sources-view h3,
+#sources-view .subtitle{
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* Optional: on small screens, slightly bias the focal point */
+@media (max-width: 700px){
+  #sources-view{ background-position: 50% 30%; }
+}
+  
+
+
+  body { 
+    margin:0; padding:0; background:var(--bg); color:var(--fg); 
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; 
+  }
+  
+  /* Navigation */
+  .nav-header {
+    background: linear-gradient(135deg, #0f1731, #1a1f3d);
+    border-bottom: 2px solid #20274a;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  
+  .nav-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--gold);
+    margin: 0 0 8px 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  
+  .nav-subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    margin: 0 0 20px 0;
+  }
+  
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 16px;
+  }
+  
+  .nav-tab {
+    padding: 12px 24px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #2a315f;
+    border-radius: 8px 8px 0 0;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+  }
+  
+  .nav-tab:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--fg);
+  }
+  
+  .nav-tab.active {
+    background: var(--panel);
+    color: var(--gold);
+    border-color: var(--gold);
+    border-bottom: 1px solid var(--panel);
+  }
+  
+  /* Content area */
+  .content {
+    min-height: calc(100vh - 140px);
+  }
+  
+  .view {
+    display: none;
+    padding: 24px;
+  }
+  
+  .view.active {
+    display: block;
+  }
+  
+  /* Heatmap styles */
+  .controls { 
+    display:grid; grid-template-columns:1fr auto auto auto; gap:14px; align-items:center; 
+    background:#12152a; border:1px solid #23284a; border-radius:12px; padding:14px; margin-bottom:16px; 
+  }
+  .ai-badges { display:flex; gap:10px; flex-wrap:wrap; }
+  .ai-badges label { 
+    display:inline-flex; align-items:center; gap:6px; background:#1a1f3d; 
+    border:1px solid #2a315f; padding:8px 12px; border-radius:999px; font-size:14px; cursor:pointer; 
+  }
+  .mode-group label { margin-right:10px; font-size:14px; }
+  .minsrc { white-space:nowrap; font-size:14px; }
+  .minsrc input[type=range] { width:200px; vertical-align:middle; }
+  .togglehide { font-size:14px; }
+  .chart-wrap { 
+    position:relative; overflow-x:auto; padding-bottom:8px; 
+    background:var(--panel); border:1px solid #20274a; border-radius:12px; 
+  }
+  .tooltip { 
+    position:absolute; pointer-events:none; z-index:10; opacity:0; 
+    background:#111318; color:#fff; border:1px solid var(--gold); 
+    border-radius:8px; padding:12px 14px; font-size:14px; line-height:1.5; max-width:360px; 
+  }
+  .pill { 
+    display:inline-block; padding:3px 7px; margin:3px 4px 0 0; border-radius:999px; 
+    background:rgba(255,215,0,0.15); border:1px solid rgba(255,215,0,0.35); 
+    white-space:nowrap; font-size:12px; 
+  }
+  .cell { cursor:pointer; }
+  .cell:hover { stroke:var(--gold); stroke-width:2; }
+  .axis text { fill:var(--fg); font-size:14px; }
+  .side-panel { 
+    background:linear-gradient(180deg,#0f1731,#0e1530); border:1px solid #20274a; 
+    border-radius:16px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  }
+  .side-panel h2 { margin:4px 0 6px; text-align:center; font-size:22px; color:var(--gold); }
+  .divider { 
+    height:1px; background:linear-gradient(90deg,rgba(255,215,0,0.35),rgba(255,215,0,0.15),rgba(255,215,0,0)); 
+    margin:10px 0 12px; 
+  }
+  .card { 
+    background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02)); 
+    border:1px solid #263059; border-radius:12px; padding:12px 14px; margin-bottom:12px; 
+  }
+  .card .album { color:var(--gold); font-weight:800; font-size:16px; }
+  .card .play { color:#9ad1ff; font-size:15px; margin-top:4px; }
+  .card .muted { color:#aeb4c7; font-size:12px; margin-top:2px; }
+  .section-title { color:#9ad1ff; font-weight:700; margin:16px 0 10px; }
+  .ai-section { border-left:3px solid #4456aa; padding-left:10px; margin:12px 0 18px; }
+  
+  .page { display:flex; gap:18px; align-items:flex-start; }
+  .left { flex:0 0 auto; }
+  .right { width:420px; flex:0 0 420px; position:sticky; top:16px; }
+  
+  /* Lineage styles */
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}
+  .legend .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#12161b;border:1px solid #27313b;font-size:12px;color:var(--muted);cursor:pointer;user-select:none;transition:.15s ease}
+  .legend .pill:hover{transform:translateY(-1px);border-color:#3a4756}
+  .legend .pill.active{color:var(--fg);border-color:#6b7280;box-shadow:0 0 0 2px rgba(255,255,255,0.04) inset}
+  .swatch{width:12px;height:12px;border-radius:50%}
+  .lineage-svg{width:100%;height:1700px;display:block;background:#0e1116}
+  .node{fill:#12161b;stroke:#2a3340;stroke-width:1.25;transition:opacity .2s ease}
+  .label{font-size:18px;fill:#ccd6dd;font-weight:550;pointer-events:none}
+  .sub{font-size:11px;fill:#85919b;pointer-events:none}
+  .root{fill:#0f1720;stroke:#3b82f6}
+  .leaf{fill:#0f1720;stroke:#22d3ee}
+  .edge{fill:none;stroke-width:3.25;opacity:.9;transition:opacity .2s ease}
+  .gridline{stroke:#1b1f24;stroke-width:1}
+  .dim{opacity:.12}
+  
+  /* Themes styles */
+  .themes-container {
+    background: var(--panel);
+    border-radius: 12px;
+    overflow: auto;
+  }
+  
+  .themes-svg { 
+    width: 100%; 
+    height: auto; 
+    display: block; 
+    background: #fff;
+  }
+  
+  /* AI Output styles */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-top: 20px;
+  }
+  
+  .sources-column {
+    background: linear-gradient(180deg, #0f1731, #0e1530);
+    border: 1px solid #20274a;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+  
+  .sources-column h3 {
+    color: var(--gold);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    text-align: center;
+  }
+  
+  .sources-column .subtitle {
+    color: var(--fg);
+    font-size: 15px;
+    text-align: center;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    line-height: 1.4;
+  }
+  
+  .ai-entry {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border: 1px solid #263059;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+  
+  .ai-entry:hover {
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+    border-color: #3a4756;
+  }
+  
+  .ai-name {
+    color: var(--fg);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  
+  .ai-link {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 4px 12px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 4px solid rgba(255, 215, 0, 0.3);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+  
+  .ai-link:hover {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: rgba(255, 215, 0, 0.5);
+    text-decoration: none;
+  }
+  
+  .ai-link.placeholder {
+    color: var(--muted);
+    background: rgba(255,255,255,0.05);
+    border-color: #2a315f;
+
+  }
+  
+  .sources-intro {
+    background: linear-gradient(135deg, #1a1f3d, #0f1731);
+    border: 1px solid #20274a;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  
+  .sources-intro h2 {
+    color: var(--gold);
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+  }
+  
+  .sources-intro p {
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 1200px) {
+    .page {
+      flex-direction: column;
+    }
+    .right {
+      width: 100%;
+      position: static;
+    }
+    .sources-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .sources-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="nav-header">
+    <h1 class="nav-title">Steely Dan × Shakespeare</h1>
+    <p class="nav-subtitle">A comprehensive analysis of thematic and literary connections between the band's work and the Bard's plays</p>
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-view="heatmap">Album/Play Heatmap</div>
+      <div class="nav-tab" data-view="lineage">Literary Lineage</div>
+      <div class="nav-tab" data-view="themes">Song/Play Themes</div>
+      <div class="nav-tab" data-view="sources">AI Output</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Heatmap View -->
+    <div id="heatmap-view" class="view active">
+      <p style="color: var(--muted); margin-bottom: 16px;">
+        Interactive heatmap showing how often different AI systems mapped Steely Dan albums to Shakespeare plays. 
+        Plays on vertical axis, albums on horizontal. Use filters to explore specific AI perspectives.
+      </p>
+      
+      <div class="controls">
+        <div class="ai-badges" id="aiChecks"></div>
+        <div class="mode-group"><strong>Match:</strong>
+          <label><input type="radio" name="matchmode" value="any" checked> ANY</label>
+          <label><input type="radio" name="matchmode" value="all"> ALL</label>
+        </div>
+        <div class="minsrc"><strong>Min sources:</strong>
+          <input type="range" id="minSources" min="1" max="8" step="1" value="1">
+          <span id="minSourcesVal">1</span>
+        </div>
+        <div class="togglehide"><label><input type="checkbox" id="hideNonMatches" checked> Hide non-matching cells</label></div>
+      </div>
+
+      <div class="page">
+        <div class="left">
+          <div class="chart-wrap">
+            <div id="heatmap"></div>
+            <div id="tooltip" class="tooltip"></div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="side-panel" id="sidePanel"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lineage View -->
+    <div id="lineage-view" class="view">
+      <p style="color: var(--muted); margin-bottom: 16px;">
+        Literary and cultural influence chains from Shakespeare to Steely Dan, as proposed by different AI systems. 
+        Click on AI names below to highlight their specific lineage paths.
+      </p>
+      
+      <div class="legend" id="lineage-legend">
+        <div class="pill active"><span class="swatch" style="background:#9aa4ad"></span><span>All</span></div>
+        <div class="pill"><span class="swatch" style="background:#6ee7b7"></span><span>ChatGPT</span></div>
+        <div class="pill"><span class="swatch" style="background:#f59e0b"></span><span>Claude</span></div>
+        <div class="pill"><span class="swatch" style="background:#60a5fa"></span><span>Grok</span></div>
+        <div class="pill"><span class="swatch" style="background:#f472b6"></span><span>Mistral</span></div>
+        <div class="pill"><span class="swatch" style="background:#a78bfa"></span><span>Copilot</span></div>
+        <div class="pill"><span class="swatch" style="background:#34d399"></span><span>Gemini</span></div>
+        <div class="pill"><span class="swatch" style="background:#fb7185"></span><span>Meta</span></div>
+        <div class="pill"><span class="swatch" style="background:#fbbf24"></span><span>Perplexity</span></div>
+      </div>
+      
+      <svg id="lineage-chart" class="lineage-svg" viewBox="0 0 2200 2300" preserveAspectRatio="xMidYMin meet"
+           aria-label="Shakespeare to Steely Dan lineage diagram"></svg>
+    </div>
+
+    <!-- Themes View -->
+    <div id="themes-view" class="view">
+      <p style="color: var(--muted); margin-bottom: 16px;">
+        Thematic connections between specific Steely Dan songs and Shakespeare plays/soliloquies, 
+        grouped by major themes. Base stroke thickness shows consensus strength; dashed overlays show which AIs proposed each mapping.
+      </p>
+      
+      <div class="themes-container">
+        <svg class="themes-svg" width="1200" height="1500" viewBox="0 0 1200 1500" xmlns="http://www.w3.org/2000/svg">
+          <style>
+            .themes-svg { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+            .title{font-size:28px;font-weight:800;fill:#111}
+            .subtitle{font-size:14px;fill:#444}
+            .panel{fill:#fff;stroke:#e5e7eb}
+            .panel-title{font-size:18px;font-weight:700;fill:#0f172a}
+            .meta{font-size:12px;fill:#64748b}
+            .edge{fill:none;opacity:.95}
+            .t-exist{stroke:#3b82f6}
+            .t-amb{stroke:#ef4444}
+            .t-time{stroke:#f59e0b}
+            .t-rom{stroke:#10b981}
+            .t-gen{stroke:#0ea5e9}
+            .ai-claude{stroke:#8b5cf6}
+            .ai-gemini{stroke:#06b6d4}
+            .ai-perp{stroke:#f97316}
+            .ai-chatgpt{stroke:#22c55e}
+            .ai-grok{stroke:#e11d48}
+            .ai-mistral{stroke:#0ea5e9}
+            .ai-meta{stroke:#a855f7}
+            .ai-copilot{stroke:#14b8a6}
+            .ai{fill:none;stroke-width:2;stroke-dasharray:10 8;opacity:.95}
+            .ai-claude{stroke-dashoffset:0}.ai-gemini{stroke-dashoffset:2}.ai-perp{stroke-dashoffset:4}
+            .ai-chatgpt{stroke-dashoffset:6}.ai-grok{stroke-dashoffset:8}.ai-mistral{stroke-dashoffset:10}
+            .ai-meta{stroke-dashoffset:12}.ai-copilot{stroke-dashoffset:14}
+            .legend-box{rx:8;ry:8}
+            .node:hover{filter:drop-shadow(0 0 6px rgba(0,0,0,.2))}
+            .box { fill:#fff; stroke:#cbd5e1; }
+            .wrap { width:100%; height:100%; }
+            .wrap > div { box-sizing:border-box; padding:8px 10px 6px 10px; width:100%; height:100%;
+              display:flex; flex-direction:column; justify-content:center; }
+            .label { font-size:14px; line-height:1.1; color:#111; font-weight:600; }
+            .sub { font-size:11px; line-height:1.1; color:#64748b; margin-top:2px; }
+          </style>
+
+          <text x="40" y="44" class="title">Steely Dan × Shakespeare — Grouped by Themes</text>
+          <text x="40" y="68" class="subtitle">Base stroke = theme • Thin dashed overlays = which AI(s) proposed that mapping • Thicker base = stronger consensus</text>
+
+          <!-- Theme legend -->
+          <g transform="translate(40,80)">
+            <rect class="legend-box" x="0" y="0" width="680" height="80" fill="#f8fafc" stroke="#e5e7eb"/>
+            <g class="meta" transform="translate(12,12)">
+              <circle cx="8" cy="8" r="6" fill="#3b82f6"/><text x="24" y="12">Existential Doubt</text>
+              <circle cx="200" cy="8" r="6" fill="#ef4444"/><text x="216" y="12">Ambition/Downfall</text>
+              <circle cx="380" cy="8" r="6" fill="#f59e0b"/><text x="396" y="12">Time/Memory</text>
+            </g>
+            <g class="meta" transform="translate(12,36)">
+              <circle cx="120" cy="8" r="6" fill="#10b981"/><text x="136" y="12">Romance/Longing</text>
+              <circle cx="300" cy="8" r="6" fill="#0ea5e9"/><text x="316" y="12">Generational Distance</text>
+            </g>
+          </g>
+
+          <!-- AI legend -->
+          <g transform="translate(740,80)">
+            <rect class="legend-box" x="0" y="0" width="420" height="100" fill="#f8fafc" stroke="#e5e7eb"/>
+            <text x="12" y="18" class="meta" style="font-weight:700">AI Stripe Legend (thin dashed overlays)</text>
+            <g class="meta" transform="translate(12,32)">
+              <line x1="0" y1="0" x2="40" y2="0" class="ai ai-claude"/><text x="48" y="4">Claude</text>
+              <line x1="130" y1="0" x2="170" y2="0" class="ai ai-gemini"/><text x="178" y="4">Gemini</text>
+              <line x1="250" y1="0" x2="290" y2="0" class="ai ai-perp"/><text x="298" y="4">Perplexity</text>
+            </g>
+            <g class="meta" transform="translate(12,56)">
+              <line x1="0" y1="0" x2="40" y2="0" class="ai ai-chatgpt"/><text x="48" y="4">ChatGPT</text>
+              <line x1="130" y1="0" x2="170" y2="0" class="ai ai-grok"/><text x="178" y="4">Grok</text>
+              <line x1="250" y1="0" x2="290" y2="0" class="ai ai-mistral"/><text x="298" y="4">Mistral</text>
+            </g>
+            <g class="meta" transform="translate(12,80)">
+              <line x1="0" y1="0" x2="40" y2="0" class="ai ai-meta"/><text x="48" y="4">Meta</text>
+              <line x1="130" y1="0" x2="170" y2="0" class="ai ai-copilot"/><text x="178" y="4">Copilot</text>
+            </g>
+          </g>
+
+          <!-- Panel 1: EXISTENTIAL DOUBT & IDENTITY -->
+          <g transform="translate(40,200)">
+            <rect class="panel" x="0" y="0" width="1120" height="190" rx="12" ry="12"/>
+            <text x="20" y="28" class="panel-title">Existential Doubt & Identity</text>
+            <text x="20" y="50" class="meta">self-fashioning, paralysis vs. action, outsider stance</text>
+
+            <rect class="box node" x="20" y="70" width="340" height="40" rx="10" ry="10"/>
+            <foreignObject x="20" y="70" width="340" height="40">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+                <div><span class="label">Deacon Blues</span><span class="sub">Aja (1977)</span></div>
+              </div>
+            </foreignObject>
+
+            <rect class="box node" x="20" y="120" width="340" height="40" rx="10" ry="10"/>
+            <foreignObject x="20" y="120" width="340" height="40">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+                <div><span class="label">Do It Again (alt. existential read)</span><span class="sub">Can't Buy a Thrill (1972)</span></div>
+              </div>
+            </foreignObject>
+
+            <rect class="box node" x="780" y="70" width="340" height="40" rx="10" ry="10"/>
+            <foreignObject x="780" y="70" width="340" height="40">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+                <div><span class="label">Hamlet — "To be, or not to be"</span><span class="sub">existential doubt</span></div>
+              </div>
+            </foreignObject>
+
+            <path class="edge t-exist" d="M360,90 C560,60 720,60 780,90" stroke-width="6"/>
+            <path class="ai ai-perp"    d="M360,90 C560,60 720,60 780,90"/>
+            <path class="ai ai-grok"    d="M360,90 C560,60 720,60 780,90"/>
+            <path class="ai ai-mistral" d="M360,90 C560,60 720,60 780,90"/>
+            <path class="ai ai-gemini"  d="M360,90 C560,60 720,60 780,90"/>
+            <path class="ai ai-copilot" d="M360,90 C560,60 720,60 780,90"/>
+            <path class="ai ai-claude"  d="M360,90 C560,60 720,60 780,90"/>
+
+            <path class="edge t-exist" d="M360,140 C560,120 720,120 780,90" stroke-width="2.5"/>
+            <path class="ai ai-gemini"  d="M360,140 C560,120 720,120 780,90"/>
+            <path class="ai ai-chatgpt" d="M360,140 C560,120 720,120 780,90"/>
+            <path class="ai ai-claude"  d="M360,140 C560,120 720,120 780,90"/>
+          </g>
+
+          <!-- Panel 2: AMBITION & DOWNFALL -->
+          <g transform="translate(40,410)">
+            <rect class="panel" x="0" y="0" width="1120" height="190" rx="12" ry="12"/>
+            <text x="20" y="28" class="panel-title">Ambition & Downfall</text>
+            <text x="20" y="50" class="meta">hubris, power, moral corrosion, collapse</text>
+
+            <rect class="box node" x="20" y="70" width="340" height="40" rx="10" ry="10"/>
+            <foreignObject x="20" y="70" width="340" height="40">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+                <div><span class="label">Kid Charlemagne</span><span class="sub">The Royal Scam (1976)</span></div>
+              </div>
+            </foreignObject>
+
+            <rect class="box node" x="20" y="120" width="340" height="40" rx="10" ry="10"/>
+            <foreignObject x="20" y="120" width="340" height="40">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+                <div><span class="label">Do It Again</span><span class="sub">Can't Buy a Thrill (1972)</span></div>
+              </div>
+            </foreignObject>
+
+            <rect class="box node" x="780" y="70" width="340" height="40" rx="10" ry="10"/>
+            <foreignObject x="780" y="70" width="340" height="40">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+                <div><span class="label">Macbeth</span><span class="sub">ambition, guilt, fate</span></div>
+              </div>
+            </foreignObject>
+
+            <path class="edge t-amb" d="M360,90 C560,80 720,80 780,90" stroke-width="5"/>
+            <path class="ai ai-grok"    d="M360,90 C560,80 720,80 780,90"/>
+            <path class="ai ai-mistral" d="M360,90 C560,80 720,80 780,90"/>
+            <path class="ai ai-chatgpt" d="M360,90 C560,80 720,80 780,90"/>
+            <path class="ai ai-copilot" d="M360,90 C560,80 720,80 780,90"/>
+            <path class="ai ai-perp"    d="M360,90 C560,80 720,80 780,90"/>
+
+            <path class="edge t-amb" d="M360,140 C560,120 720,110 780,90" stroke-width="2.5"/>
+            <path class="ai ai-grok"    d="M360,140 C560,120 720,110 780,90"/>
+            <path class="ai ai-gemini"  d="M360,140 C560,120 720,110 780,90"/>
+            <path class="ai ai-claude"  d="M360,140 C560,120 720,110 780,90"/>
+          </g>
+
+           <!-- ===== Panel 3: TIME, MEMORY & AGING ===== -->
+  <g transform="translate(40,620)">
+    <rect class="panel" x="0" y="0" width="1120" height="180" rx="12" ry="12"/>
+    <text x="20" y="28" class="panel-title">Time, Memory & Aging</text>
+    <text x="20" y="50" class="meta">retrospection, roles, impermanence</text>
+
+    <!-- SONG: Reelin' in the Years -->
+    <rect class="box node" x="20" y="70" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="20" y="70" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">Reelin' in the Years</span><span class="sub">Can't Buy a Thrill (1972)</span></div>
+      </div>
+    </foreignObject>
+
+    <!-- WORK: AYLI -->
+    <rect class="box node" x="780" y="70" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="780" y="70" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">As You Like It — "All the world's a stage"</span><span class="sub">the seven ages</span></div>
+      </div>
+    </foreignObject>
+
+    <!-- Edge -->
+    <path class="edge t-time" d="M360,90 C560,90 720,90 780,90" stroke-width="3.5"/>
+    <path class="ai ai-perp"    d="M360,90 C560,90 720,90 780,90"/>
+    <path class="ai ai-grok"    d="M360,90 C560,90 720,90 780,90"/>
+    <path class="ai ai-mistral" d="M360,90 C560,90 720,90 780,90"/>
+  </g>
+
+  <!-- ===== Panel 4: ROMANCE, LONGING & MISCOMMUNICATION ===== -->
+  <g transform="translate(40,820)">
+    <rect class="panel" x="0" y="0" width="1120" height="240" rx="12" ry="12"/>
+    <text x="20" y="28" class="panel-title">Romance, Longing & Miscommunication</text>
+    <text x="20" y="50" class="meta">desire under constraint, letters, disguise, banter</text>
+
+    <!-- SONGS -->
+    <rect class="box node" x="20" y="80" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="20" y="80" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">Rikki Don't Lose That Number</span><span class="sub">Pretzel Logic (1974)</span></div>
+      </div>
+    </foreignObject>
+
+    <rect class="box node" x="20" y="130" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="20" y="130" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">Peg</span><span class="sub">Aja (1977)</span></div>
+      </div>
+    </foreignObject>
+
+    <rect class="box node" x="20" y="180" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="20" y="180" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">Dirty Work (alt.)</span><span class="sub">Can't Buy a Thrill (1972)</span></div>
+      </div>
+    </foreignObject>
+
+    <!-- WORKS -->
+    <rect class="box node" x="780" y="70" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="780" y="70" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">Romeo & Juliet — Balcony scene</span><span class="sub">urgent connection</span></div>
+      </div>
+    </foreignObject>
+
+    <rect class="box node" x="780" y="120" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="780" y="120" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">Twelfth Night — Viola's longing</span><span class="sub">disguise & hidden love</span></div>
+      </div>
+    </foreignObject>
+
+    <rect class="box node" x="780" y="170" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="780" y="170" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">Much Ado About Nothing</span><span class="sub">banter & misreadings</span></div>
+      </div>
+    </foreignObject>
+
+    <rect class="box node" x="780" y="220" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="780" y="220" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">Othello — Emilia's reckoning (alt.)</span><span class="sub">exploitation → truth</span></div>
+      </div>
+    </foreignObject>
+
+    <!-- Edges -->
+    <path class="edge t-rom" d="M360,100 C560,80 720,80 780,90" stroke-width="2.8"/>
+    <path class="ai ai-perp"    d="M360,100 C560,80 720,80 780,90"/>
+    <path class="ai ai-gemini"  d="M360,100 C560,80 720,80 780,90"/>
+    <path class="ai ai-copilot" d="M360,100 C560,80 720,80 780,90"/>
+
+    <path class="edge t-rom" d="M360,150 C560,140 720,140 780,140" stroke-width="2.2"/>
+    <path class="ai ai-gemini"  d="M360,150 C560,140 720,140 780,140"/>
+    <path class="ai ai-copilot" d="M360,150 C560,140 720,140 780,140"/>
+
+    <path class="edge t-rom" d="M360,200 C560,200 720,200 780,190" stroke-width="2.2"/>
+    <path class="ai ai-grok"    d="M360,200 C560,200 720,200 780,190"/>
+    <path class="ai ai-meta"    d="M360,200 C560,200 720,200 780,190"/>
+
+    <path class="edge t-rom" d="M360,250 C560,260 720,260 780,240" stroke-width="1.8"/>
+    <path class="ai ai-copilot" d="M360,250 C560,260 720,260 780,240"/>
+  </g>
+
+  <!-- ===== Panel 5: GENERATIONAL DISTANCE & RECONCILIATION ===== -->
+  <g transform="translate(40,1080)">
+    <rect class="panel" x="0" y="0" width="1120" height="100" rx="12" ry="12"/>
+    <text x="20" y="28" class="panel-title">Generational Distance & Reconciliation</text>
+    <text x="20" y="50" class="meta">gaps in experience, misunderstanding, renewal</text>
+
+    <!-- SONG: Hey Nineteen -->
+    <rect class="box node" x="20" y="60" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="20" y="60" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">Hey Nineteen</span><span class="sub">Gaucho (1980)</span></div>
+      </div>
+    </foreignObject>
+
+    <!-- WORK: Winter's Tale -->
+    <rect class="box node" x="780" y="60" width="340" height="40" rx="10" ry="10"/>
+    <foreignObject x="780" y="60" width="340" height="40">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="wrap">
+        <div><span class="label">The Winter's Tale</span><span class="sub">seasons, loss, renewal</span></div>
+      </div>
+    </foreignObject>
+
+    <!-- Edge -->
+    <path class="edge t-gen" d="M360,80 C560,80 720,80 780,80" stroke-width="1.8"/>
+    <path class="ai ai-claude"  d="M360,80 C560,80 720,80 780,80"/>
+    <path class="ai ai-meta"    d="M360,80 C560,80 720,80 780,80"/>
+  </g>
+          
+          <text x="1160" y="1480" text-anchor="end" class="meta">Sources: AI mappings from Claude, Gemini, Perplexity, ChatGPT, Grok, Mistral, Meta, Copilot</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- AI Output View -->
+    <div id="sources-view" class="view">
+      <div class="sources-intro">
+        <h2>AI Output Sources</h2>
+        <p><h3>Complete reference to all AI system outputs that contributed to this analysis. Each AI provided mappings across the three main categories. Click the links below to access the original documents and detailed analysis from each system.</h3></p>
+      </div>
+      
+      <div class="sources-grid">
+        <!-- Column 1: Albums to Plays -->
+        <div class="sources-column">
+          <h3>Steely Dan Albums → Shakespeare Plays</h3>
+          <p class="subtitle">Systematic mappings of each album to corresponding plays based on thematic resonance</p>
+          <p class="subtitle">PROMPT: Map Shakespeare plays to the first 7 Steely Dan albums and provide the rationale for each one.</p>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Claude</span>
+            <a href="Claude - Shakespeare and Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Gemini</span>
+            <a href="Gemini - Shakespeare and Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Perplexity</span>
+            <a href="Perplexity - Shakespeare and Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">ChatGPT</span>
+            <a href="ChatGPT - Shakespeare and Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Grok</span>
+            <a href="grok - Shakespeare and Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Mistral</span>
+            <a href="mistral - Shakespeare and Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Meta AI</span>
+            <a href="meta - Shakespeare and Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Copilot</span>
+            <a href="copiliot - Shakespeare and Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+        </div>
+
+        <!-- Column 2: Literary Lineage -->
+        <div class="sources-column">
+          <h3>Shakespeare → Steely Dan Lineage</h3>
+          <p class="subtitle">Cultural and literary influence chains tracing connections across centuries</p>
+          <p class="subtitle">PROMPT: Establish a linkage between Shakespeare and Steely Dan as follows:  Shakespeare influenced A, who influenced B, ..., who influenced x who influenced Steely Dan</p>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Claude</span>
+            <a href="Claude - Lineage Shakespeare to Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Gemini</span>
+            <a href="Gemini - Lineage Shakespeare to Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Perplexity</span>
+            <a href="Perplexity - Lineage Shakespeare to Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">ChatGPT</span>
+            <a href="ChatGPT - Lineage Shakespeare to Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Grok</span>
+            <a href="grok - Lineage Shakespeare to Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Mistral</span>
+            <a href="mistral - Lineage Shakespeare to Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Meta AI</span>
+            <a href="meta - Lineage Shakespeare to Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Copilot</span>
+            <a href="copilot - Lineage Shakespeare to Steely Dan 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+        </div>
+
+        <!-- Column 3: Songs to Plays/Themes -->
+        <div class="sources-column">
+          <h3>Steely Dan Songs → Shakespeare Plays/Themes</h3>
+          <p class="subtitle">Specific song-to-play mappings and thematic analysis of individual tracks</p>
+          <p class="subtitle">PROMPT: Map the top 5 Steely Dan songs to Shakespeare plays and/or particular soliloquies</p>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Claude</span>
+            <a href="Claude - Top 5 Steely Dan to Shakespeare 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Gemini</span>
+            <a href="Gemini - Top 5 Steely Dan to Shakespeare 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Perplexity</span>
+            <a href="Perplexity - Top 5 Steely Dan to Shakespeare 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">ChatGPT</span>
+            <a href="ChatGPT - Top 5 Steely Dan to Shakespeare 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Grok</span>
+            <a href="grok - Top 5 Steely Dan to Shakespeare 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Mistral</span>
+            <a href="mistral - Top 5 Steely Dan to Shakespeare 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Meta AI</span>
+            <a href="meta - Top 5 Steely Dan to Shakespeare 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+          
+          <div class="ai-entry">
+            <span class="ai-name">Copilot</span>
+            <a href="copilot - Top 5 Steely Dan to Shakespeare 090525.pdf" target="_blank" class="ai-link placeholder">OUTPUT</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Navigation logic
+  const navTabs = document.querySelectorAll('.nav-tab');
+  const views = document.querySelectorAll('.view');
+  
+  navTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetView = tab.dataset.view;
+      
+      // Update active tab
+      navTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // Update active view
+      views.forEach(v => v.classList.remove('active'));
+      document.getElementById(targetView + '-view').classList.add('active');
+      
+      // Initialize view-specific functionality
+      if (targetView === 'heatmap') {
+        initHeatmap();
+      } else if (targetView === 'lineage') {
+        initLineage();
+      } else if (targetView === 'sources') {
+        // Sources view doesn't need special initialization
+      }
+    });
+  });
+
+  // Initialize heatmap by default
+  initHeatmap();
+
+  // Heatmap functionality
+  function initHeatmap() {
+    // Only initialize if not already done
+    if (document.querySelector('#heatmap svg')) return;
+    
+    // ====== Data ======
+    const albums=["Can't Buy a Thrill","Countdown to Ecstasy","Pretzel Logic","Katy Lied","The Royal Scam","Aja","Gaucho"];
+    const AI_NAMES=["Claude","Gemini","Perplexity","ChatGPT","Grok","Mistral","Meta","Copilot"];
+    const table=[
+      ["Can't Buy a Thrill","MacBeth","A Midsummer Night's","A Midsummer Night's","Much Ado","Romeo and Juliet","The Merchant of Venice","A Midsummer Night's","A Midsummer Night's"],
+      ["Countdown to Ecstasy","Hamlet","The Taming of the Shrew","Julius Caesar","MacBeth","A Midsummer Night's","Romeo and Juliet","Twelfth Night","Julius Caesar"],
+      ["Pretzel Logic","Much Ado","Hamlet","Hamlet","Hamlet","Much Ado","A Midsummer Night's","The Merchant of Venice","Hamlet"],
+      ["Katy Lied","King Lear","Othello","Othello","Othello","Othello","Much Ado","The Tempest","Othello"],
+      ["The Royal Scam","Coriolanus","MacBeth","King Lear","Timon of Athens","MacBeth","MacBeth","Hamlet","MacBeth"],
+      ["Aja","The Tempest","TheTempest","The Tempest","The Tempest","The Tempest","Hamlet","Othello","The Tempest"],
+      ["Gaucho","Troilus and Cressida","King Lear","MacBeth","Antony and Cleopatra","Hamlet","Twelfth Night","MacBeth","King Lear"]
+    ];
+
+    function canonicalPlay(s){
+      if(!s) return s;
+      const t=s.trim().toLowerCase().replace(/\u2019/g,"'").replace(/\s+/g," ");
+      const map={"macbeth":"Macbeth","mac beth":"Macbeth","much ado":"Much Ado About Nothing","much ado about nothing":"Much Ado About Nothing","a midsummer night's dream":"A Midsummer Night's Dream","the tempest":"The Tempest","thetempest":"The Tempest","hamlet":"Hamlet","king lear":"King Lear","romeo and juliet":"Romeo and Juliet","the merchant of venice":"The Merchant of Venice","twelfth night":"Twelfth Night","the taming of the shrew":"The Taming of the Shrew","julius caesar":"Julius Caesar","coriolanus":"Coriolanus","timon of athens":"Timon of Athens","antony and cleopatra":"Antony and Cleopatra","othello":"Othello","troilus and cressida":"Troilus and Cressida"};
+      if(map[t]) return map[t];
+      if(t.startsWith("a midsummer night's")) return "A Midsummer Night's Dream";
+      return s;
+    }
+
+    // Build cells
+    const playsSet=new Set(), cellMap={}; albums.forEach(a=>cellMap[a]={});
+    for(let r=0;r<table.length;r++){
+      const album=table[r][0];
+      for(let c=1;c<table[r].length;c++){
+        const ai=AI_NAMES[c-1];
+        const play=canonicalPlay(table[r][c]);
+        playsSet.add(play);
+        if(!cellMap[album][play]) cellMap[album][play]={count:0,sources:[]};
+        cellMap[album][play].count++;
+        cellMap[album][play].sources.push(ai);
+      }
+    }
+    const plays=[...playsSet].sort();
+    const cells=[];
+    albums.forEach(a=>{
+      plays.forEach(p=>{
+        const e=cellMap[a][p];
+        if(e){ e.sources=[...new Set(e.sources)].sort(); cells.push({album:a,play:p,count:e.count,sources:e.sources}); }
+      });
+    });
+
+    // ====== Heatmap (plays on Y, albums on X) ======
+    const margin={top:90,right:40,bottom:200,left:280};
+    const cellSize=60;
+    const width=albums.length*cellSize+margin.left+margin.right;
+    const height=plays.length*cellSize+margin.top+margin.bottom;
+
+    const svg=d3.select("#heatmap").append("svg").attr("width",width).attr("height",height);
+    const g=svg.append("g").attr("transform",`translate(${margin.left},${margin.top})`);
+
+    const x=d3.scaleBand().domain(albums).range([0,albums.length*cellSize]).padding(0.12);
+    const y=d3.scaleBand().domain(plays).range([0,plays.length*cellSize]).padding(0.12);
+
+    const maxFreq=d3.max(cells,d=>d.count)||1;
+    const color=d3.scaleSequential(d3.interpolateViridis).domain([0,maxFreq]);
+
+    const tooltip=d3.select("#tooltip");
+    const showTooltip=(ev,html)=>{ 
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      tooltip.html(html).style("opacity",0.97).style("left", centerX + "px").style("top", centerY + "px").style("transform", "translate(-50%, -50%)"); 
+    };
+    const moveTooltip=(ev)=>{ /* Tooltip stays centered, no movement needed */ };
+    const hideTooltip=()=>{ tooltip.transition().duration(180).style("opacity",0); };
+
+    const rects=g.selectAll("rect.cell").data(cells).enter().append("rect")
+      .attr("class","cell")
+      .attr("x",d=>x(d.album)).attr("y",d=>y(d.play))
+      .attr("rx",6).attr("ry",6).attr("width",x.bandwidth()).attr("height",y.bandwidth())
+      .attr("fill",d=>color(d.count))
+      .on("mouseover",(ev,d)=>{const pills=d.sources.map(s=>`<span class="pill">${s}</span>`).join(" ");showTooltip(ev,`<div style="font-size:15px;"><b>${d.album}</b> → <b>${d.play}</b></div><div style="margin-top:6px;">Count: ${d.count}</div><div style="margin-top:6px;"><em>AI programs:</em><br>${pills||'—'}</div>`);})
+      .on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+
+    const labels=g.selectAll("text.count").data(cells).enter().append("text")
+      .attr("class","count").attr("x",d=>x(d.album)+x.bandwidth()/2).attr("y",d=>y(d.play)+y.bandwidth()/2+1)
+      .attr("text-anchor","middle").attr("dominant-baseline","middle")
+      .attr("fill",d=>d.count>=maxFreq/2?"#fff":"#0d0f18").attr("font-weight","700").attr("font-size","22px")
+      .text(d=>d.count);
+
+    // Axes
+    g.append("g").attr("transform",`translate(0,${plays.length*cellSize})`)
+      .call(d3.axisBottom(x)).selectAll("text").attr("transform","rotate(-25)").style("text-anchor","end").style("font-size","18px");
+    g.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size","18px");
+
+    // Axis titles
+    svg.append("text").attr("x",margin.left+(albums.length*cellSize)/2).attr("y",height-30)
+      .attr("text-anchor","middle").style("fill","#e6e9f5").style("font-weight","600").style("font-size","22px").text("Steely Dan Albums");
+    svg.append("text").attr("x",30).attr("y",margin.top+(plays.length*cellSize)/2)
+      .attr("text-anchor","middle").attr("transform",`rotate(-90,30,${margin.top+(plays.length*cellSize)/2})`)
+      .style("fill","#e6e9f5").style("font-weight","600").style("font-size","22px").text("Shakespeare Plays");
+
+    // ====== Controls / Filters ======
+    const aiChecksDiv=document.getElementById("aiChecks");
+    AI_NAMES.forEach((n,i)=>{ aiChecksDiv.insertAdjacentHTML("beforeend",`<label><input type="checkbox" id="ai_${i}" value="${n}"> ${n}</label>`); });
+
+    const selectedAIs=()=>AI_NAMES.filter((n,i)=>document.getElementById("ai_"+i).checked);
+    const matchMode=()=>{const node=document.querySelector('input[name="matchmode"]:checked');return node?node.value:"any";};
+    const minSources=()=>+document.getElementById("minSources").value||1;
+    const hideNonMatches=()=>document.getElementById("hideNonMatches").checked;
+
+    document.getElementById("minSources").addEventListener("input",e=>{ document.getElementById("minSourcesVal").textContent=e.target.value; });
+
+    function cellMatches(d,sel,mode,minSrc){
+      if(d.count<minSrc) return false;
+      if(sel.length===0) return true;
+      return mode==="all" ? sel.every(s=>d.sources.includes(s)) : sel.some(s=>d.sources.includes(s));
+    }
+
+    function applyFilters(){
+      const sel=selectedAIs(),mode=matchMode(),minSrc=minSources(),hide=hideNonMatches();
+      rects.attr("display",d=>hide?(cellMatches(d,sel,mode,minSrc)?null:"none"):null)
+           .attr("opacity",d=>hide?1:(cellMatches(d,sel,mode,minSrc)?1:0.2));
+      labels.attr("display",d=>hide?(cellMatches(d,sel,mode,minSrc)?null:"none"):null)
+            .attr("opacity",d=>hide?1:(cellMatches(d,sel,mode,minSrc)?1:0.2));
+      renderSidePanel(sel);
+    }
+
+    // Wire events
+    AI_NAMES.forEach((_,i)=>{ document.getElementById("ai_"+i).addEventListener("change",applyFilters); });
+    document.querySelectorAll('input[name="matchmode"]').forEach(el=>el.addEventListener("change",applyFilters));
+    document.getElementById("minSources").addEventListener("change",applyFilters);
+    document.getElementById("hideNonMatches").addEventListener("change",applyFilters);
+
+    // ====== Side Panel ======
+    const sidePanel=document.getElementById("sidePanel");
+
+    function consensusList(){
+      const out=[];
+      albums.forEach(album=>{
+        let bestPlay=null, bestCount=-1;
+        Object.entries(cellMap[album]).forEach(([p,info])=>{
+          if(info.count>bestCount){ bestCount=info.count; bestPlay=p; }
+        });
+        out.push({album, play:bestPlay, count:bestCount});
+      });
+      return out;
+    }
+
+    function aiMappings(aiName){
+      const idx=AI_NAMES.indexOf(aiName);
+      if(idx<0) return [];
+      const list=[];
+      for(let r=0;r<table.length;r++){
+        const album=table[r][0];
+        const raw=table[r][idx+1];
+        list.push({album, play: canonicalPlay(raw)});
+      }
+      return list;
+    }
+
+    function renderSidePanel(selected){
+      sidePanel.innerHTML="";
+      if(selected.length===0){
+        sidePanel.insertAdjacentHTML("beforeend", `<h2>Most Common Pairings</h2><div class="divider"></div>`);
+        consensusList().forEach(({album,play,count})=>{
+          sidePanel.insertAdjacentHTML("beforeend", `
+            <div class="card">
+              <div class="album">${album}</div>
+              <div class="play">${play}</div>
+              <div class="muted">${count} of 8 sources agree</div>
+            </div>
+          `);
+        });
+      } else {
+        selected.forEach(ai=>{
+          sidePanel.insertAdjacentHTML("beforeend", `<div class="section-title">${ai}</div><div class="ai-section" id="sec_${ai.replace(/\s+/g,'_')}"></div>`);
+          const el=document.getElementById(`sec_${ai.replace(/\s+/g,'_')}`);
+          aiMappings(ai).forEach(({album,play})=>{
+            el.insertAdjacentHTML("beforeend", `
+              <div class="card">
+                <div class="album">${album}</div>
+                <div class="play">${play}</div>
+              </div>
+            `);
+          });
+        });
+      }
+    }
+
+    // Initial draw
+    applyFilters();
+  }
+
+  // Lineage functionality
+  function initLineage() {
+    // Only initialize if not already done
+    if (document.querySelector('#lineage-chart g')) return;
+    
+    // Lineage logic from the original file
+    const svg = document.getElementById('lineage-chart');
+
+    const PATHS = [
+      { ai:'ChatGPT', color:'#6ee7b7', seq:['Shakespeare','Duke Ellington','Steely Dan'] },
+      { ai:'ChatGPT', color:'#6ee7b7', seq:['Shakespeare','Oscar Wilde','Noël Coward','Cole Porter','Steely Dan'] },
+      { ai:'ChatGPT', color:'#6ee7b7', seq:['Shakespeare','Orson Welles','Film noir tone','Steely Dan'] },
+      { ai:'ChatGPT', color:'#6ee7b7', seq:['Shakespeare','T. S. Eliot','William S. Burroughs','Steely Dan'] },
+      { ai:'ChatGPT', color:'#6ee7b7', seq:['Shakespeare','Stratford Shakespeare Festival','Duke Ellington','Steely Dan'] },
+      { ai:'ChatGPT', color:'#6ee7b7', seq:['Shakespeare','Vladimir Nabokov / Jorge Luis Borges','Steely Dan'] },
+      { ai:'Claude', color:'#f59e0b', seq:['Shakespeare','John Donne','S. T. Coleridge','Charles Baudelaire','T. S. Eliot','William S. Burroughs','Steely Dan'] },
+      { ai:'Grok', color:'#60a5fa', seq:['Shakespeare','James Joyce','William S. Burroughs','Bob Dylan','Steely Dan'] },
+      { ai:'Mistral', color:'#f472b6', seq:['Shakespeare','John Donne','T. S. Eliot','Beat Generation','Bob Dylan','Jazz & Blues Tradition','Steely Dan'] },
+      { ai:'Copilot', color:'#a78bfa', seq:['Shakespeare','John Milton','William Blake','T. S. Eliot','William S. Burroughs','Steely Dan'] },
+      { ai:'Gemini', color:'#34d399', seq:['Shakespeare','Oscar Wilde','P. G. Wodehouse','Tom Lehrer','Steely Dan'] },
+      { ai:'Meta', color:'#fb7185', seq:['Shakespeare','John Keats','Walter Pater','F. Scott Fitzgerald','Steely Dan'] },
+      { ai:'Perplexity', color:'#fbbf24', seq:['Shakespeare','Romantics & Modernists (Byron / Eliot / Joyce)','Satirical Novelists (Nabokov / Vonnegut / Burroughs)','Comic Songwriters (Zappa / Lehrer)','Steely Dan'] },
+    ];
+
+    // Map of which AIs reference each node (for filtering)
+    const nodeAIs = new Map();
+    PATHS.forEach(p => p.seq.forEach(n => {
+      if(!nodeAIs.has(n)) nodeAIs.set(n, new Set());
+      nodeAIs.get(n).add(p.ai);
+    }));
+
+    const maxDepth = Math.max(...PATHS.map(p => p.seq.length - 1));
+    const levelMap = new Map();
+    PATHS.forEach(p => p.seq.forEach((n,i) => {
+      if (n==='Shakespeare') levelMap.set(n,0);
+      else if (n==='Steely Dan') levelMap.set(n,maxDepth);
+      else if (!levelMap.has(n)) levelMap.set(n,i);
+    }));
+
+    const levels = Array.from({length:maxDepth+1}, () => []);
+    levelMap.forEach((lvl,n) => levels[lvl].push(n));
+    levels[0] = ['Shakespeare'];
+    levels[maxDepth] = ['Steely Dan'];
+    levels.forEach((arr,i) => { if (i!==0 && i!==maxDepth) arr.sort((a,b)=>a.localeCompare(b)); });
+
+    function wrapLines(str,limit){
+      const toks = String(str).split(/\s+/).filter(Boolean), out=[]; let line='';
+      const push=()=>{ if(line){ out.push(line.trim()); line=''; } };
+      for(const t of toks){
+        if((line+' '+t).trim().length<=limit){ line=(line? line+' ' : '')+t; }
+        else { push(); if(t.length>limit){ let c=t; while(c.length>limit){ out.push(c.slice(0,limit)); c=c.slice(limit);} line=c; } else line=t; }
+      }
+      push(); return out;
+    }
+
+    const nodeDims=new Map();
+    levels.flat().forEach(n=>{
+      const lines=wrapLines(n,24);
+      const w=Math.min(340, Math.max(140, Math.max(...lines.map(s=>s.length))*8 + 30));
+      const h=34 + 18*(lines.length-1) + 18;
+      nodeDims.set(n,{w,h,lines});
+    });
+
+    const VIEW_W=2200, topPad=110,leftPad=90,rightPad=90,levelGap=170,minGap=36;
+    const nodePos=new Map();
+
+    for(let lvl=0; lvl<levels.length; lvl++){
+      const arr=levels[lvl]; if(!arr||arr.length===0) continue;
+      const y=topPad + lvl*levelGap;
+      if(arr.length===1){
+        const n=arr[0]; const {w,h}=nodeDims.get(n);
+        const x=leftPad + (VIEW_W-leftPad-rightPad)/2;
+        nodePos.set(n,{x,y,w,h}); continue;
+      }
+      const usable=VIEW_W-leftPad-rightPad;
+      const step=usable/Math.max(1,(arr.length-1));
+      const targets=arr.map((_,i)=> leftPad + i*step);
+      let cursor=-Infinity; const placed=[];
+      for(let i=0;i<arr.length;i++){
+        const n=arr[i]; const dim=nodeDims.get(n); const half=dim.w/2;
+        const x=Math.max(targets[i], isFinite(cursor)? cursor + minGap + half : targets[i]);
+        placed.push({name:n,x,w:dim.w,h:dim.h}); cursor=x+half;
+      }
+      const leftEdge=placed[0].x - placed[0].w/2;
+      const rightEdge=placed[placed.length-1].x + placed[placed.length-1].w/2;
+      const block=rightEdge-leftEdge;
+      const spare=(VIEW_W-leftPad-rightPad)-block;
+      const offset=spare>0 ? spare/2 : 0;
+      placed.forEach(p=> nodePos.set(p.name,{x:p.x+offset,y,w:p.w,h:p.h}));
+    }
+
+    const NS='http://www.w3.org/2000/svg';
+    function el(t){ return document.createElementNS(NS,t); }
+    function edge(d,stroke){ const p=el('path'); p.setAttribute('d',d); p.setAttribute('stroke',stroke); p.setAttribute('stroke-width','3.5'); p.setAttribute('opacity','0.95'); p.setAttribute('fill','none'); svg.appendChild(p); return p; }
+    function rect(x,y,w,h,r,cls){ const rr=el('rect'); rr.setAttribute('x',x); rr.setAttribute('y',y); rr.setAttribute('width',w); rr.setAttribute('height',h); rr.setAttribute('rx',r); rr.setAttribute('class',cls); rr.setAttribute('style','fill:#12161b;stroke:#2a3340;stroke-width:1.25'); svg.appendChild(rr); return rr; }
+    function multilineText(lines,x,y){ const g=el('text'); g.setAttribute('x',x); g.setAttribute('y',y); g.setAttribute('text-anchor','middle'); g.setAttribute('style','font-size:16px;fill:#e2e8ef;font-weight:650'); lines.forEach((t,i)=>{ const tspan=el('tspan'); tspan.setAttribute('x',x); if(i>0) tspan.setAttribute('dy',18); tspan.textContent=t; g.appendChild(tspan); }); svg.appendChild(g); return g; }
+    function sub(t,x,y){ const s=el('text'); s.setAttribute('x',x); s.setAttribute('y',y); s.setAttribute('text-anchor','middle'); s.setAttribute('style','font-size:12px;fill:#9fb0bd'); s.textContent=t; svg.appendChild(s); }
+
+    for(let d=0; d<=maxDepth; d++){ const gl=el('line'); gl.setAttribute('x1','0'); gl.setAttribute('y1', String(topPad + d*levelGap)); gl.setAttribute('x2', String(VIEW_W)); gl.setAttribute('y2', String(topPad + d*levelGap)); gl.setAttribute('style','stroke:#1b1f24;stroke-width:1'); svg.appendChild(gl); }
+
+    const edgeEls = [];
+    PATHS.forEach(p=>{
+      for(let i=0;i<p.seq.length-1;i++){
+        const A=nodePos.get(p.seq[i]); const B=nodePos.get(p.seq[i+1]); if(!A||!B) continue;
+        const mx=(A.x + B.x)/2;
+        const d=`M ${A.x},${A.y + A.h/2 - 6} C ${mx},${A.y+110} ${mx},${B.y-110} ${B.x},${B.y - B.h/2 + 6}`;
+        const e = edge(d, p.color);
+        e.dataset.ai = p.ai; edgeEls.push(e);
+      }
+    });
+
+    const nodeBoxEls = new Map();
+    const labelEls = new Map();
+
+    for(const [name,P] of nodePos){
+      const {x,y,w,h}=P; const root=name==='Shakespeare', leaf=name==='Steely Dan';
+      const box = rect(x-w/2, y-h/2, w, h, 12, root? 'root node' : (leaf? 'leaf node' : 'node'));
+      nodeBoxEls.set(name, box);
+      const lines = nodeDims.get(name).lines;
+      const label = multilineText(lines, x, y - (lines.length-1)*9 + 5);
+      labelEls.set(name, label);
+      if(root) sub('Origin',x,y + h/2 - 10); if(leaf) sub('Destination',x,y + h/2 - 10);
+    }
+
+    // Legend click → highlight a single model path
+    const legendPills = Array.from(document.querySelectorAll('#lineage-legend .pill'));
+    const modelNames = ['All','ChatGPT','Claude','Grok','Mistral','Copilot','Gemini','Meta','Perplexity'];
+
+    legendPills.forEach((pill, i) => {
+      pill.addEventListener('click', () => {
+        legendPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const name = modelNames[i];
+        applyLineageFilter(name === 'All' ? null : name);
+      });
+    });
+
+    applyLineageFilter(null);
+
+    function applyLineageFilter(ai){
+      edgeEls.forEach(e => {
+        e.style.opacity = (ai && e.dataset.ai !== ai) ? '0.12' : '1';
+      });
+      nodeBoxEls.forEach((box, name) => {
+        const keep = !ai || name==='Shakespeare' || name==='Steely Dan' || (nodeAIs.get(name)||new Set()).has(ai);
+        box.style.opacity = keep ? '1' : '0.12';
+        const lbl = labelEls.get(name);
+        if(lbl) lbl.style.opacity = keep ? '1' : '0.12';
+      });
+    }
+  }
+});
+</script>
+</body>
+</html>

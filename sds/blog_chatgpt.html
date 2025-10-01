@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hamlet in Suburbia or Deacon Blues in Denmark? — Shakespeare × Steely Dan with AI</title>
+  <meta name="description" content="A project exploring connections between Shakespeare and Steely Dan using multiple AI systems—mappings, lineages, and song/soliloquy pairings." />
+  <style>
+    :root{
+      --bg:#0b1020;           /* deep blue */
+      --ink:#e9eef9;          /* near-white */
+      --muted:#b8c2e0;        /* muted text */
+      --accent:#86e1ff;       /* cyan */
+      --accent-2:#ffc876;     /* warm accent */
+      --card:#141a33;         /* panel */
+      --line:#263056;         /* borders */
+      --table-stripe:#10162b; /* zebra */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 800px at 85% -10%, #1a2250 0%, transparent 60%),
+                  radial-gradient(900px 600px at -20% 20%, #122046 0%, transparent 60%),
+                  var(--bg);
+      color:var(--ink); line-height:1.6;
+    }
+    a{color:var(--accent); text-decoration: none}
+    a:hover{text-decoration: underline}
+    .wrap{display:grid; grid-template-columns: 320px 1fr; gap:2rem; max-width: 1300px; margin:0 auto; padding:2rem 1.25rem 4rem}
+    @media (max-width: 980px){ .wrap{ grid-template-columns: 1fr; } }
+
+    /* Sidebar */
+    .toc{
+      position: sticky; top: 1rem; align-self: start; background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      border:1px solid var(--line); border-radius:16px; padding:1rem; box-shadow: var(--shadow);
+    }
+    .toc h2{margin:0 0 .5rem 0; font-size:1rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+    .toc nav a{display:block; padding:.4rem .5rem; border-radius:10px; color:var(--ink)}
+    .toc nav a:hover{background: rgba(134,225,255,.12)}
+    .toc .minor{font-size:.92rem; color:var(--muted)}
+
+    /* Main */
+    header.hero{grid-column: 1/-1; display:grid; place-items:center; padding:3rem 1rem 2rem; text-align:center}
+    .badge{display:inline-block; padding:.3rem .6rem; border:1px solid var(--line); border-radius:999px; font-size:.8rem; color:var(--muted)}
+    h1{font-size: clamp(1.8rem, 2.2rem + 1.2vw, 3.2rem); margin:.4rem 0 0 0; line-height:1.15}
+    .subtitle{color:var(--muted); margin:.5rem 0 0 0}
+
+    .section{background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)); border:1px solid var(--line);
+             border-radius:18px; padding:1.25rem; margin:0 0 1.25rem 0; box-shadow: var(--shadow)}
+    .section h2{margin:0 0 .5rem 0; font-size: clamp(1.2rem, 1.05rem + .6vw, 1.8rem)}
+    .section h3{margin:1rem 0 .5rem 0}
+    p{margin:.6rem 0}
+
+    /* Callouts */
+    .callout{border-left:4px solid var(--accent); padding:.75rem 1rem; background:rgba(134,225,255,.06); border-radius:10px}
+
+    /* Tables */
+    .table-wrap{overflow:auto; border:1px solid var(--line); border-radius:14px}
+    table{width:100%; border-collapse: collapse; min-width:620px}
+    th, td{padding:.7rem .8rem; border-bottom:1px solid var(--line); vertical-align: top}
+    th{background:rgba(255,255,255,.04); text-align:left; font-weight:600}
+    tr:nth-child(even){background:var(--table-stripe)}
+
+    /* Chips */
+    .chips{display:flex; flex-wrap:wrap; gap:.5rem}
+    .chip{padding:.25rem .6rem; border-radius:999px; border:1px solid var(--line); color:var(--muted); font-size:.85rem}
+
+    /* Footer */
+    footer{grid-column:1/-1; text-align:center; color:var(--muted); padding-top:1.5rem}
+
+    /* Small helpers */
+    .grid-2{display:grid; grid-template-columns: 1fr 1fr; gap:1rem}
+    @media (max-width:900px){ .grid-2{grid-template-columns:1fr} }
+    .note{color:var(--muted); font-size:.95rem}
+    .pill{display:inline-block; padding:.25rem .55rem; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:.8rem}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <span class="badge">Project</span>
+      <h1>Hamlet in Suburbia or Deacon Blues in Denmark?</h1>
+      <p class="subtitle">Exploring the association between Shakespeare and Steely Dan with AI</p>
+      <p class="note">This page compiles and formats the draft narrative, keeping your voice while adding light structure, tables, and navigation.</p>
+    </header>
+
+    <aside class="toc">
+      <h2>Contents</h2>
+      <nav>
+        <a href="#background">Background</a>
+        <a href="#process">The Process</a>
+        <a href="#results">Results</a>
+        <a class="minor" href="#plays-to-albums">— Plays → Albums</a>
+        <a class="minor" href="#cte">— Spotlight: <em>Countdown to Ecstasy</em></a>
+        <a class="minor" href="#matrix">— Full Mapping Matrix</a>
+        <a class="minor" href="#similarity">— Agreement & Similarity</a>
+        <a href="#lineage">Lineage</a>
+        <a href="#songs">Songs / Soliloquies / Plays</a>
+        <a href="#final">Final Thoughts</a>
+      </nav>
+      <div style="margin-top:.75rem" class="note">Tip: Use the table headers to scan, or pinch-zoom tables on mobile.</div>
+    </aside>
+
+    <main>
+      <section id="background" class="section">
+        <h2>Background</h2>
+        <p>For me, the summer of 1993 was the “Summer of Shakespeare and Steely Dan.” I was an undergraduate, and after a rough spring I needed something different. I picked up <em>A Decade of Steely Dan</em> and—between familiar radio cuts and new discoveries—the album sparked long conversations with friends. I also (somewhat accidentally) found myself enrolled in both World Religions and a Shakespeare course. The idea to connect Shakespeare and Steely Dan didn’t arrive then; it surfaced decades later while experimenting with AI, beginning around February 2024.</p>
+        <p>I asked multiple AI systems to explore connections—mappings, lineages, and song pairings—and later summarized their outputs and built a web presentation.</p>
+      </section>
+
+      <section id="process" class="section">
+        <h2>The Process</h2>
+        <div class="callout">
+          <p><strong>AI systems used:</strong> Claude 4.0, Gemini 2.5 Pro, ChatGPT 5, Perplexity, Grok, Mistral, Meta, and Copilot. Scope limited to the first seven Steely Dan studio albums (1972–1980) and Shakespeare’s plays.</p>
+          <div class="chips" style="margin-top:.5rem">
+            <span class="chip">Plays → Albums</span>
+            <span class="chip">Lineage (Shakespeare → … → Steely Dan)</span>
+            <span class="chip">Top 5 Songs ↔ Plays/Soliloquies</span>
+          </div>
+        </div>
+        <h3>Prompts</h3>
+        <ul>
+          <li>Map Shakespeare plays to the first 7 Steely Dan albums and provide the rationale.</li>
+          <li>Establish a linkage: <em>Shakespeare influenced A, who influenced B, …, who influenced x who influenced Steely Dan.</em></li>
+          <li>Map the top 5 Steely Dan songs to Shakespeare plays and/or specific soliloquies.</li>
+        </ul>
+        <p class="note">Top 5 songs were allowed to vary by AI (each system selected its own list).</p>
+      </section>
+
+      <section id="results" class="section">
+        <h2>Results</h2>
+        <section id="plays-to-albums">
+          <h3>Plays → Albums (Highlights)</h3>
+          <p><strong>Only <em>Hamlet</em> and <em>Macbeth</em></strong> were named by all programs—but not to the same albums. <em>Hamlet</em> was mapped to five different albums (four programs → <em>Pretzel Logic</em>), and <em>Macbeth</em> to four albums (four programs → <em>The Royal Scam</em>).</p>
+          <p>The most common pairings:</p>
+          <ul>
+            <li><strong><em>The Tempest</em> ↔ <em>Aja</em></strong> — six programs</li>
+            <li><strong><em>Othello</em> ↔ <em>Katy Lied</em></strong> — five programs</li>
+            <li><strong><em>A Midsummer Night’s Dream</em> ↔ <em>Can’t Buy a Thrill</em></strong> — four programs</li>
+          </ul>
+          <div class="grid-2">
+            <div>
+              <h4>Why <em>The Tempest</em> ↔ <em>Aja</em>?</h4>
+              <div class="callout">
+                <p><strong>Claude:</strong> late-style mastery; magic/otherworldliness; control/orchestration; resolution & reconciliation.</p>
+                <p><strong>ChatGPT:</strong> late-style mastery (final play vs. peak album); serene transcendence; Prospero-like studio perfectionism.</p>
+              </div>
+            </div>
+            <div>
+              <h4><em>Countdown to Ecstasy</em> ≈ many plays</h4>
+              <p>The album was mapped to <em>seven different plays</em> across AIs (3 comedies, 4 tragedies), signaling a flexible thematic profile.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="cte" style="margin-top:1rem">
+          <h3>Spotlight: <em>Countdown to Ecstasy</em> (Per‑AI reasons)</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>AI Program</th>
+                  <th>Play</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Claude</td>
+                  <td><em>Hamlet</em></td>
+                  <td>Paranoid edge and psychological complexity mirror Hamlet’s inner landscape.</td>
+                </tr>
+                <tr>
+                  <td>Gemini</td>
+                  <td><em>The Taming of the Shrew</em></td>
+                  <td>Complex arrangements and witty, sometimes cynical writing reflect the battle of wits and unconventional romance.</td>
+                </tr>
+                <tr>
+                  <td>ChatGPT</td>
+                  <td><em>Macbeth</em></td>
+                  <td>Harder, ensemble-first bite and apocalyptic edge trace Macbeth’s hustle from prophecy to burnout.</td>
+                </tr>
+                <tr>
+                  <td>Perplexity</td>
+                  <td><em>Julius Caesar</em></td>
+                  <td>Sharp, ambitious, power plays; reflections on betrayal and shifting allegiances.</td>
+                </tr>
+                <tr>
+                  <td>Grok</td>
+                  <td><em>A Midsummer Night’s Dream</em></td>
+                  <td>Jam-friendly, satirical storytelling evokes ecstatic chaos and whimsical narratives.</td>
+                </tr>
+                <tr>
+                  <td>Mistral</td>
+                  <td><em>Romeo and Juliet</em></td>
+                  <td>Introspective and melancholic; doomed love and existential longing.</td>
+                </tr>
+                <tr>
+                  <td>Meta</td>
+                  <td><em>Twelfth Night</em></td>
+                  <td>Eclecticism and emotional depth; themes of love, identity, deception.</td>
+                </tr>
+                <tr>
+                  <td>Copilot</td>
+                  <td><em>Julius Caesar</em></td>
+                  <td>Politically charged, ambitious; disillusionment with power and fame.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="matrix" style="margin-top:1rem">
+          <h3>Full Mapping Matrix (Plays → Albums by AI)</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>AI</th>
+                  <th><em>Can’t Buy a Thrill</em></th>
+                  <th><em>Countdown to Ecstasy</em></th>
+                  <th><em>Pretzel Logic</em></th>
+                  <th><em>Katy Lied</em></th>
+                  <th><em>The Royal Scam</em></th>
+                  <th><em>Aja</em></th>
+                  <th><em>Gaucho</em></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Claude</td>
+                  <td><em>Macbeth</em></td>
+                  <td><em>Hamlet</em></td>
+                  <td><em>Much Ado About Nothing</em></td>
+                  <td><em>King Lear</em></td>
+                  <td><em>Coriolanus</em></td>
+                  <td><em>The Tempest</em></td>
+                  <td><em>Troilus and Cressida</em></td>
+                </tr>
+                <tr>
+                  <td>Gemini</td>
+                  <td><em>A Midsummer Night’s Dream</em></td>
+                  <td><em>The Taming of the Shrew</em></td>
+                  <td><em>Hamlet</em></td>
+                  <td><em>Othello</em></td>
+                  <td><em>Macbeth</em></td>
+                  <td><em>The Tempest</em></td>
+                  <td><em>King Lear</em></td>
+                </tr>
+                <tr>
+                  <td>ChatGPT</td>
+                  <td><em>Much Ado About Nothing</em></td>
+                  <td><em>Macbeth</em></td>
+                  <td><em>Hamlet</em></td>
+                  <td><em>Othello</em></td>
+                  <td><em>Timon of Athens</em></td>
+                  <td><em>The Tempest</em></td>
+                  <td><em>Antony and Cleopatra</em></td>
+                </tr>
+                <tr>
+                  <td>Perplexity</td>
+                  <td><em>A Midsummer Night’s Dream</em></td>
+                  <td><em>Julius Caesar</em></td>
+                  <td><em>Hamlet</em></td>
+                  <td><em>Othello</em></td>
+                  <td><em>King Lear</em></td>
+                  <td><em>The Tempest</em></td>
+                  <td><em>Macbeth</em></td>
+                </tr>
+                <tr>
+                  <td>Grok</td>
+                  <td><em>Romeo and Juliet</em></td>
+                  <td><em>A Midsummer Night’s Dream</em></td>
+                  <td><em>Much Ado About Nothing</em></td>
+                  <td><em>Othello</em></td>
+                  <td><em>Macbeth</em></td>
+                  <td><em>The Tempest</em></td>
+                  <td><em>Hamlet</em></td>
+                </tr>
+                <tr>
+                  <td>Mistral</td>
+                  <td><em>The Merchant of Venice</em></td>
+                  <td><em>Romeo and Juliet</em></td>
+                  <td><em>A Midsummer Night’s Dream</em></td>
+                  <td><em>Much Ado About Nothing</em></td>
+                  <td><em>Macbeth</em></td>
+                  <td><em>Hamlet</em></td>
+                  <td><em>Twelfth Night</em></td>
+                </tr>
+                <tr>
+                  <td>Meta</td>
+                  <td><em>A Midsummer Night’s Dream</em></td>
+                  <td><em>Twelfth Night</em></td>
+                  <td><em>The Merchant of Venice</em></td>
+                  <td><em>The Tempest</em></td>
+                  <td><em>Hamlet</em></td>
+                  <td><em>Othello</em></td>
+                  <td><em>Macbeth</em></td>
+                </tr>
+                <tr>
+                  <td>Copilot</td>
+                  <td><em>A Midsummer Night’s Dream</em></td>
+                  <td><em>Julius Caesar</em></td>
+                  <td><em>Hamlet</em></td>
+                  <td><em>Othello</em></td>
+                  <td><em>Macbeth</em></td>
+                  <td><em>The Tempest</em></td>
+                  <td><em>King Lear</em></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <section id="similarity" style="margin-top:1rem">
+            <h3>Agreement & Similarity</h3>
+            <ul>
+              <li><strong>Highest agreement:</strong> Gemini ↔ Copilot (6/7), differing only on <em>Countdown to Ecstasy</em>.</li>
+              <li>Copilot ↔ Perplexity agreed on 5/7 (swapping <em>King Lear</em>/<em>Macbeth</em> across <em>The Royal Scam</em>/<em>Gaucho</em>).</li>
+              <li>Gemini ↔ Perplexity agreed on 4/7 with a similar <em>Lear</em>/<em>Macbeth</em> swap and different <em>Countdown</em> choices.</li>
+              <li><strong>Least agreement:</strong> Mistral and Meta; both had multiple unique pairings and fewer overlaps.</li>
+            </ul>
+          </section>
+        </section>
+
+        <section id="lineage" class="section">
+          <h2>Lineage (Shakespeare → … → Steely Dan)</h2>
+          <p>Most programs proposed a single path; ChatGPT offered six, including the shortest: <em>Shakespeare → Duke Ellington → Steely Dan</em>. Across the non‑ChatGPT outputs, the average number of intermediaries was four.</p>
+          <ul>
+            <li><strong>Most common influences:</strong> William S. Burroughs and T. S. Eliot (each named by four of the seven non‑ChatGPT systems).</li>
+            <li><strong>Also recurring:</strong> John Donne, Oscar Wilde, Vladimir Nabokov, James Joyce, Duke Ellington, Bob Dylan, Tom Lehrer.</li>
+            <li><strong>Odd outlier cited by Meta:</strong> Jay McInerney (later‑era tie to Fagen).</li>
+          </ul>
+          <p class="note">All ChatGPT lineages overlapped with others only on Burroughs, Eliot, Wilde, and Nabokov.</p>
+        </section>
+
+        <section id="songs" class="section">
+          <h2>Songs / Soliloquies / Plays</h2>
+          <p>Each AI selected its own “Top 5” Steely Dan songs and then mapped them to plays or specific speeches. Summary highlights:</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Song</th>
+                  <th>Times Selected</th>
+                  <th>Most Common Pairing</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Deacon Blues</strong></td>
+                  <td>8</td>
+                  <td><em>Hamlet</em> — “To be or not to be…” (×5)</td>
+                </tr>
+                <tr>
+                  <td><strong>Reelin’ in the Years</strong></td>
+                  <td>7</td>
+                  <td><em>Hamlet</em> — “To be or not to be…” (×2); <em>As You Like It</em> — “All the world’s a stage…” (×2)</td>
+                </tr>
+                <tr>
+                  <td><strong>Rikki Don’t Lose That Number</strong></td>
+                  <td>5</td>
+                  <td><em>Romeo and Juliet</em> (×2)</td>
+                </tr>
+                <tr>
+                  <td><strong>Kid Charlemagne</strong></td>
+                  <td>5</td>
+                  <td><em>Macbeth</em> (×5)</td>
+                </tr>
+                <tr>
+                  <td><strong>Do It Again</strong></td>
+                  <td>4</td>
+                  <td><em>Macbeth</em> (×2), <em>Hamlet</em> (×2)</td>
+                </tr>
+                <tr>
+                  <td><strong>Peg</strong></td>
+                  <td>3</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><strong>Aja</strong></td>
+                  <td>3</td>
+                  <td><em>The Tempest</em> (×2)</td>
+                </tr>
+                <tr>
+                  <td><strong>Hey Nineteen</strong></td>
+                  <td>2</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><strong>Doctor Wu</strong></td>
+                  <td>1</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><strong>Any Major Dude</strong></td>
+                  <td>1</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><strong>Dirty Work</strong></td>
+                  <td>1</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout" style="margin-top:1rem">
+            <p><strong>Patterns (Claude):</strong> existential themes; moral complexity; sophisticated wordplay; urban cynicism vs. timeless concerns.</p>
+            <p><strong>Echo (ChatGPT):</strong> pairings center on existential crises, tragic ambition, ironic detachment, and bittersweet reflections on time and love.</p>
+          </div>
+        </section>
+
+        <section id="final" class="section">
+          <h2>Final Thoughts</h2>
+          <p>Likely the first sustained attempt (found via AI search) to connect Shakespeare with Steely Dan, this project shows both convergence and variability across AI systems. The mappings often rhyme, but rationales diverge; lineages crisscross through different cultural figures. Next steps could include a deeper manual review and personal curation of definitive pairings.</p>
+          <p>If I could revisit the summer of 1993, this would’ve made a lively Shakespeare project—especially with today’s tools: AI research companions and a streaming catalog a click away.</p>
+        </section>
+      </section>
+
+      <footer>
+        <p class="pill">© Your Project · Built from draft notes and AI outputs</p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
